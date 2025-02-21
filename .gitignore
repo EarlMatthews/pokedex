@@ -1,0 +1,32 @@
+# Dependency directories (remove the comment below to include)
+# vendor/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.out
+*.test
+
+# Go specific
+go.sum
+go.mod
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.bak
+
+# Logs and temporary files
+*.log
+tmp/
+
+# Documentation
+docs/generated/
+
+# Miscellaneous
+LICENSE
+README.md
+Makefile
