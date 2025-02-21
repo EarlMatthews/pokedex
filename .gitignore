@@ -22,6 +22,7 @@ go.mod
 # Logs and temporary files
 *.log
 tmp/
+repl.log
 
 # Documentation
 docs/generated/
