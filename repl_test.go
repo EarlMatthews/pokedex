@@ -2,55 +2,58 @@ package main
 
 import (
 	"testing"
-	"fmt"
-	"os"
-	"bytes"
+	"reflect"
 )
 
-func TestCommandHelp(t *testing.T) {
-	cliCommands = map[string]cliCommand{
-		"exit": {name: "exit", description: "Exit the Pokedex", callback: commandExit},
-		"help": {name: "help", description: "Displays a help message", callback: commandHelp},
+func TestCleanInput(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected []string
+	}{
+		{
+			name:     "Normal input",
+			input:    "hello world",
+			expected: []string{"hello", "world"},
+		},
+		{
+			name:     "Multiple spaces between words",
+			input:    "hello   world",
+			expected: []string{"hello", "world"},
+		},
+		{
+			name:     "Leading and trailing spaces",
+			input:    "  hello world  ",
+			expected: []string{"hello", "world"},
+		},
+		{
+			name:     "Empty input",
+			input:    "",
+			expected: []string{},
+		},
+		{
+			name:     "All whitespace characters",
+			input:    "\t\n\r\f ",
+			expected: []string{},
+		},
+		{
+			name:     "Single word",
+			input:    "test",
+			expected: []string{"test"},
+		},
+		{
+			name:     "Mixed whitespace characters",
+			input:    "hello\tworld\nanother\r\fword",
+			expected: []string{"hello", "world", "another", "word"},
+		},
 	}
 
-	var output bytes.Buffer
-	fmt.Fprintln(&output, "Welcome to the Pokedex!\nUsage:")
-	for _, cmd := range cliCommands {
-		fmt.Fprintf(&output, "%s: %s\n", cmd.name, cmd.description)
-	}
-
-	expected := output.String()
-
-	// Capture stdout
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	commandHelp()
-
-	w.Close()
-	var testOutput bytes.Buffer
-	testOutput.ReadFrom(r)
-	os.Stdout = oldStdout // Restore stdout
-
-	if testOutput.String() != expected {
-		t.Errorf("Expected output:\n%s\nGot:\n%s", expected, testOutput.String())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := cleanInput(tt.input)
+			if !reflect.DeepEqual(actual, tt.expected) {
+				t.Errorf("cleanInput(%q) = %v, expected %v", tt.input, actual, tt.expected)
+			}
+		})
 	}
 }
-
-func TestCommandExit(t *testing.T) {
-	exited := false
-
-	exitFunc = func(code int) {
-		exited = true
-	}
-
-	commandExit()
-
-	if !exited {
-		t.Errorf("Expected commandExit to call exitFunc, but it did not")
-	}
-
-	exitFunc = os.Exit // Restore original exit function
-}
-
